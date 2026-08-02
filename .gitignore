@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+*.log
+*.egg-info/
+.pytest_cache/
+5_self_improve_loop/logs_*.json
+tests/_test_*.json
+7_mission_dashboard/_mission_report.pdf
