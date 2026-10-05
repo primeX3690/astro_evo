@@ -199,6 +199,81 @@ cd tests && python test_module7.py    # ~1 min
 
 ---
 
+## Module 8 - 8_realworld_validation/
+Fetches a real TLE (Celestrak, offline fallback bundled), seeds module 1's
+J2 propagator from SGP4's own state, cross-checks over multiple real
+orbits. **0.58 km max error vs. the real ISS over 3 orbits.** See
+`VALIDATION_REPORT.md` for why SGP4 (not GMAT/Orekit) is the baseline here.
+\`\`\`bash
+python run_mission_ai.py --mode validate-tle --norad-id 25544 --orbits 3
+\`\`\`
+
+## Module 9 - 9_ccsds_interop/
+CCSDS 502.0-B OEM ephemeris (read/write) + CCSDS 133.0-B-2 Space Packet
+(pack/unpack) - the real wire formats ground-ops tooling speaks.
+\`\`\`bash
+python run_mission_ai.py --mode export-oem --orbit LEO --duration-hr 2 --output mission.oem
+\`\`\`
+
+## Module 10 - 10_ground_ops/
+WGS-84 ground-station geometry, AOS/LOS/peak-elevation pass prediction,
+and an RF link budget (FSPL/EIRP/C-N0/Eb-N0/margin).
+\`\`\`bash
+python run_mission_ai.py --mode ground-pass --station-name Gorakhpur --station-lat 26.76 --station-lon 83.37 --duration-hr 24
+\`\`\`
+
+## Module 11 - 11_safety_guardrails/
+Deterministic, physics-derived "suicide burn" safety envelope that
+overrides ANY proposed action (RL or otherwise) when the current descent
+speed can no longer be safely arrested before impact - the Hybrid
+Deterministic RL-Guardrail pattern. Proven with a deliberately bad
+policy: **30/30 hard crashes -> 0/30 hard crashes**, purely from physics.
+\`\`\`bash
+python run_mission_ai.py --mode lander-safe --episodes 10000
+\`\`\`
+
+## Module 12 - 12_api/
+FastAPI REST layer over trajectory planning, TLE validation, and
+ground-ops - auto-documented at `/docs`. Containerized via `Dockerfile`
+(see root). **Not build-tested here (no Docker daemon in this sandbox)
+- verify yourself with `docker build` before a live demo.**
+\`\`\`bash
+python run_mission_ai.py --mode serve-api --port 8000
+# then open http://localhost:8000/docs
+\`\`\`
+
+## Module 13 - 13_realtime_telemetry/
+Real-time CCSDS telemetry streaming over a real UDP socket - the
+data-plane piece real-time ingestion/HIL testing plugs into. Software-
+only; no physical hardware involved (see `BENCHMARKS.md` caveats).
+\`\`\`bash
+python run_mission_ai.py --mode stream-telemetry --rate-hz 20
+\`\`\`
+
+## Module 14 - 14_collision_avoidance/
+Conjunction screening + minimum-delta-V avoidance maneuver, built on
+module 4's existing CW relative-motion docking solver (same physics,
+opposite goal). **USP Option 1.** Detected a 5.4 m close approach,
+avoided it with an 8.75 m/s cross-track burn to 5 km safe separation.
+\`\`\`bash
+cd tests && python test_module14.py
+\`\`\`
+
+## Module 15 - 15_edge_inference/
+Trains the lander's PPO policy, exports its weights to a plain C header,
+and runs inference in ~80 lines of pure C (no Python/numpy) - verified
+to match the source Python model to float32 precision. **USP Option 3,
+proof-of-correctness stage** (not yet ARM-cross-compiled or quantized -
+see `BENCHMARKS.md` caveats).
+\`\`\`bash
+cd 15_edge_inference
+python export_weights.py          # trains + writes model_weights.h
+gcc -O2 -o edge_infer edge_inference.c -lm
+./edge_infer 3.0 25.0 0.5 -2.0 60.0    # x y vx vy fuel -> action probs + choice
+\`\`\`
+
+---
+
 ## Project structure
 
 \`\`\`
@@ -210,12 +285,22 @@ AstroEvo/
 ├── 5_self_improve_loop/
 ├── 6_simulation_hub/
 ├── 7_mission_dashboard/
+├── 8_realworld_validation/    (real TLE + SGP4 cross-check)
+├── 9_ccsds_interop/           (CCSDS OEM + Space Packet)
+├── 10_ground_ops/             (ground-station passes + link budget)
+├── 11_safety_guardrails/      (deterministic RL safety envelope)
+├── 12_api/                    (FastAPI REST service)
+├── 13_realtime_telemetry/     (UDP CCSDS telemetry streaming)
+├── 14_collision_avoidance/    (conjunction screening + avoidance burn)
+├── 15_edge_inference/         (trained policy exported to pure C)
 ├── config/
 │   └── mission_config.yaml
-├── tests/                    (test_module1.py .. test_module7.py, test_module4_3d.py)
-├── run_mission_ai.py          (master CLI switch)
+├── tests/                    (test_module1.py .. test_module15.py, test_module4_3d.py)
+├── run_mission_ai.py          (master CLI switch - all 10 modes)
 ├── requirements.txt           (single file, all dependencies)
+├── Dockerfile / docker-compose.yml   (containerizes module 12's API)
 ├── BENCHMARKS.md
+├── VALIDATION_REPORT.md        (honest physics-validation writeup)
 ├── README.md                  (this file)
 ├── LICENSE                    (MIT)
 └── .gitignore

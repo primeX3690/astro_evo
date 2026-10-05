@@ -1,11 +1,22 @@
-venv/
+# Python bytecode cache (Faltu automatic files)
 __pycache__/
 *.pyc
-.vscode/
-.idea/
-*.log
-*.egg-info/
-.pytest_cache/
-5_self_improve_loop/logs_*.json
-tests/_test_*.json
-7_mission_dashboard/_mission_report.pdf
+*.pyo
+*.pyd
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Virtual environment (Future ke liye safety)
+.venv/
+venv/
+ENV/
+
+# Local configuration
+config/virtual_hardware.json
+# Compiled native kernels (built on the user's own machine, never shipped)
+core_engine/native/*.so
+core_engine/native/*.dll
+core_engine/native/*.dylib
+core_engine/native/*.failed

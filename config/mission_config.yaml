@@ -32,3 +32,34 @@ rocket:
   propellant_mass_kg: 800
   isp_seconds: 300
   thrust_newtons: 2000
+tle_validation:
+  norad_id: 25544
+  orbits: 3
+
+oem_export:
+  orbit: LEO
+  inclination_deg: 51.6
+  duration_hours: 2.0
+  dt_seconds: 60.0
+  object_name: ASTROEVO_SAT
+  object_id: 2026-001A
+  output_path: mission_output.oem
+
+ground_ops:
+  orbit: LEO
+  inclination_deg: 51.6
+  duration_hours: 24.0
+  station_name: Gorakhpur
+  station_lat_deg: 26.7606
+  station_lon_deg: 83.3732
+  station_alt_km: 0.084
+  min_elevation_deg: 10.0
+  tx_power_w: 1.0
+  tx_antenna_gain_dbi: 0.0
+  tx_line_loss_db: 0.5
+  freq_hz: 437000000.0
+  rx_antenna_gain_dbi: 15.0
+  rx_system_noise_temp_k: 600.0
+  rx_line_loss_db: 0.5
+  data_rate_bps: 9600
+  required_eb_n0_db: 10.0
