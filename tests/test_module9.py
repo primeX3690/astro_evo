@@ -18,7 +18,7 @@ if __name__ == "__main__":
     traj = propagate_orbit(r0, v0, duration_s=3600, dt=60.0)
     times_s = np.arange(len(traj)) * 60.0
     epoch = datetime(2026, 9, 16, 0, 0, 0)
-    out_path = "/tmp/astroevo_test.oem"
+    out_path = "astroevo_test.oem"
     oem_text = write_oem(times_s, traj, epoch, "TESTSAT", "2026-001A", output_path=out_path)
     check("OEM text has required CCSDS header keyword", "CCSDS_OEM_VERS" in oem_text)
     check("OEM text has META_START/META_STOP block", "META_START" in oem_text and "META_STOP" in oem_text)
